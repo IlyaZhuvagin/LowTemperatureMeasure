@@ -1,15 +1,17 @@
 import datetime
-# from keithley import Keithley_2000
+from keithley import Keithley_2000
 from pyqtgraph.Qt import QtGui
 import pandas as pd
 import numpy as np
 import pyqtgraph as pg
 import threading
 import time as tm
-from scipy import interpolate
+#from scipy import interpolate
 
-# R1 = Keithley_2000("GPIB0::16::INSTR")
+PROG_ON = True
 
+R1 = Keithley_2000("GPIB0::6::INSTR")
+R2 = Keithley_2000("")
 app = pg.mkQApp("Plotting Example")
 mw = QtGui.QMainWindow()
 mw.resize(1000, 600)
@@ -68,12 +70,12 @@ def save(Time, T, Rt1, Rt2, R_sample):
     dfs.to_csv(f'{name_of_the_file}.csv', sep='\t', index=False)
 
 
-dfs = pd.DataFrame()
+dfs = pd.DataFrame({'Time': [], 'T': [], 'Rt1': [], 'Rt2': [], 'R_sample': []})
 
 
 def read():
     global data, data1, data2, data3, timearray, ms, begin, name_of_the_file, dfs, start_record
-    while True:
+    while PROG_ON:
         tm.sleep(0.1)
         if not Turn_off:
             name_of_the_file = text.text()
@@ -90,20 +92,31 @@ def read():
                 data3 = np.append(data3, np.random.normal(15))
             save(timearray[-1], data[-1], data1[-1], data2[-1], data3[-1])
 
+    print('read finished')
+
 
 def update():
     if not Turn_off:
         with lock:
-            curve1.setData(dfs[Combo_Box.currentText()], dfs[Combo_Box2.currentText()])
-            curve2.setData(dfs[Combo_Box3.currentText()], dfs[Combo_Box4.currentText()])
-            curve4.setData(dfs[Combo_Box5.currentText()], dfs[Combo_Box6.currentText()])
-            curve5.setData(dfs[Combo_Box7.currentText()], dfs[Combo_Box8.currentText()])
+            # print(len(dfs['Time']))
+            if len(dfs['Time']) < 200:
+                curve1.setData(dfs[Combo_Box.currentText()], dfs[Combo_Box2.currentText()])
+                curve2.setData(dfs[Combo_Box3.currentText()], dfs[Combo_Box4.currentText()])
+                curve4.setData(dfs[Combo_Box5.currentText()], dfs[Combo_Box6.currentText()])
+                curve5.setData(dfs[Combo_Box7.currentText()], dfs[Combo_Box8.currentText()])
+            else:
+                curve1.setData(np.array(dfs[Combo_Box.currentText()][-200:]), np.array(dfs[Combo_Box2.currentText()][-200:]))
+                curve2.setData(np.array(dfs[Combo_Box3.currentText()][-200:]), np.array(dfs[Combo_Box4.currentText()][-200:]))
+                curve4.setData(np.array(dfs[Combo_Box5.currentText()][-200:]), np.array(dfs[Combo_Box6.currentText()][-200:]))
+                curve5.setData(np.array(dfs[Combo_Box7.currentText()][-200:]), np.array(dfs[Combo_Box8.currentText()][-200:]))
 
 
 def timer():
-    while True:
+    while PROG_ON:
         update()
         tm.sleep(0.5)
+
+    print('timer finished')
 
 
 def on_click():
@@ -181,3 +194,6 @@ if __name__ == '__main__':
     timer = threading.Thread(target=timer)
     timer.start()
     pg.exec()
+    PROG_ON = False
+    read.join()
+    timer.join()
