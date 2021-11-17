@@ -19,28 +19,27 @@ layout = QtGui.QGridLayout()
 cw.setLayout(layout)
 mw.show()
 
-win = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
-win.resize(1000, 600)
+win1 = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
+win2 = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
+# win3 = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
 # win.setWindowTitle('pyqtgraph example: Plotting')
-
+win4 = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
+win5 = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
 # Enable antialiasing for prettier plots
 pg.setConfigOptions(antialias=True)
 
-p2 = win.addPlot(title="Resistance 1")
-curve1 = p2.plot(pen='g')
+p1 = win1.addPlot(title=" ")
+curve1 = p1.plot(pen='g')
 
-p3 = win.addPlot(title="Resistance 2")
-curve2 = p3.plot(pen='w')
-win.nextRow()
+p2 = win2.addPlot(title=' ')
+curve2 = p2.plot(pen='w')
 
-p4 = win.addPlot(title="Resistance 3")
-curve3 = p4.plot(pen='r')
-
-p6 = win.addPlot(title="Resistance sample")
-curve = p6.plot(pen='y')
-
-p7 = win.addPlot(title="Interpolate")
-curve4 = p7.plot(pen='y')
+# p3 = win3.addPlot(title="Interpolate")
+# curve3 = p3.plot(pen='y')
+p4 = win4.addPlot(title=' ')
+curve4 = p4.plot(pen='r')
+p5 = win5.addPlot(title=' ')
+curve5 = p5.plot(pen='y')
 
 Turn_off = True
 data = np.array([])
@@ -58,15 +57,18 @@ lock = threading.Lock()
 start_from = 0
 
 
-def save(time_to_save, T, Rt1, Rt2, R_sample):
+def save(Time, T, Rt1, Rt2, R_sample):
     global dfs, name_of_the_file, start_from
-    new_row = {'time': time_to_save,
+    new_row = {'Time': Time,
                'T': T,
                'Rt1': Rt1,
                'Rt2': Rt2,
                'R_sample': R_sample}
     dfs = dfs.append(new_row, ignore_index=True)
     dfs.to_csv(f'{name_of_the_file}.csv', sep='\t', index=False)
+
+
+dfs = pd.DataFrame()
 
 
 def read():
@@ -89,23 +91,13 @@ def read():
             save(timearray[-1], data[-1], data1[-1], data2[-1], data3[-1])
 
 
-len_time_array = 10000
-
-
 def update():
-    global curve, p3, p2, p4, p6, Turn_off, data, timearray
     if not Turn_off:
         with lock:
-            if len(timearray) > len_time_array:
-                curve.setData(timearray[-len_time_array:], data[-len_time_array:])
-                curve1.setData(timearray[-len_time_array:], data1[-len_time_array:])
-                curve2.setData(timearray[-len_time_array:], data2[-len_time_array:])
-                curve3.setData(timearray[-len_time_array:], data3[-len_time_array:])
-            else:
-                curve.setData(timearray, data)
-                curve1.setData(timearray, data1)
-                curve2.setData(timearray, data2)
-                curve3.setData(timearray, data3)
+            curve1.setData(dfs[Combo_Box.currentText()], dfs[Combo_Box2.currentText()])
+            curve2.setData(dfs[Combo_Box3.currentText()], dfs[Combo_Box4.currentText()])
+            curve4.setData(dfs[Combo_Box5.currentText()], dfs[Combo_Box6.currentText()])
+            curve5.setData(dfs[Combo_Box7.currentText()], dfs[Combo_Box8.currentText()])
 
 
 def timer():
@@ -126,6 +118,11 @@ def off_click():
     print('Programme is started')
 
 
+def cb1(x, y):
+    if Combo_Box.currentText() == x and Combo_Box2.currentText() == y:
+        curve1.setData(dfs[x], dfs[y])
+
+
 end = QtGui.QPushButton()
 end.setText("Stop")
 end.clicked.connect(on_click)
@@ -133,22 +130,49 @@ start = QtGui.QPushButton()
 start.setText("Start")
 start.clicked.connect(off_click)
 text = QtGui.QLineEdit()
-layout.addWidget(win, 0, 0, 1, 2)
-layout.addWidget(end, 1, 1)
-layout.addWidget(start, 1, 0)
-layout.addWidget(text, 2, 0, 1, 2)
-
-R = [150, 66, 23]
-
-T = [300, 77, 4.2]
-
-f = interpolate.interp1d(T, R)
-
-xnew = np.arange(4.2, 300)
-
-ynew = f(xnew)
-
-curve4.setData(xnew, ynew)
+Combo_Box = QtGui.QComboBox()
+Combo_Box2 = QtGui.QComboBox()
+Combo_Box3 = QtGui.QComboBox()
+Combo_Box4 = QtGui.QComboBox()
+Combo_Box5 = QtGui.QComboBox()
+Combo_Box6 = QtGui.QComboBox()
+Combo_Box7 = QtGui.QComboBox()
+Combo_Box8 = QtGui.QComboBox()
+Combo_Box.addItems(['Time', 'T', 'Rt1', 'Rt2', 'R_sample'])
+Combo_Box2.addItems(['Time', 'T', 'Rt1', 'Rt2', 'R_sample'])
+Combo_Box3.addItems(['Time', 'T', 'Rt1', 'Rt2', 'R_sample'])
+Combo_Box4.addItems(['Time', 'T', 'Rt1', 'Rt2', 'R_sample'])
+Combo_Box5.addItems(['Time', 'T', 'Rt1', 'Rt2', 'R_sample'])
+Combo_Box6.addItems(['Time', 'T', 'Rt1', 'Rt2', 'R_sample'])
+Combo_Box7.addItems(['Time', 'T', 'Rt1', 'Rt2', 'R_sample'])
+Combo_Box8.addItems(['Time', 'T', 'Rt1', 'Rt2', 'R_sample'])
+layout.addWidget(win1, 0, 0, 2, 2)
+layout.addWidget(win2, 0, 2, 2, 2)
+layout.addWidget(win4, 3, 0, 2, 2)
+layout.addWidget(win5, 3, 2, 2, 2)
+# layout.addWidget(win3, 8, 0, 2, 2)
+layout.addWidget(end, 6, 2, 1, 2)
+layout.addWidget(start, 6, 0, 1, 2)
+layout.addWidget(text, 7, 0, 1, 4)
+layout.addWidget(Combo_Box, 2, 0, 1, 1)
+layout.addWidget(Combo_Box2, 2, 1, 1, 1)
+layout.addWidget(Combo_Box3, 2, 2, 1, 1)
+layout.addWidget(Combo_Box4, 2, 3, 1, 1)
+layout.addWidget(Combo_Box5, 5, 0, 1, 1)
+layout.addWidget(Combo_Box6, 5, 1, 1, 1)
+layout.addWidget(Combo_Box7, 5, 2, 1, 1)
+layout.addWidget(Combo_Box8, 5, 3, 1, 1)
+# R = [150, 66, 23]
+#
+# T = [300, 77, 4.2]
+#
+# f = interpolate.interp1d(T, R)
+#
+# xnew = np.arange(4.2, 300)
+#
+# ynew = f(xnew)
+#
+# curve3.setData(xnew, ynew)
 
 if __name__ == '__main__':
     read = threading.Thread(target=read)
