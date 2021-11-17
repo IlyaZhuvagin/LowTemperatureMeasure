@@ -7,6 +7,7 @@ import pyqtgraph as pg
 import threading
 import time as tm
 from scipy import interpolate
+
 # R1 = Keithley_2000("GPIB0::16::INSTR")
 
 app = pg.mkQApp("Plotting Example")
@@ -57,13 +58,13 @@ lock = threading.Lock()
 start_from = 0
 
 
-def save(time_to_save, y, r1, r2, r_obr):
+def save(time_to_save, T, Rt1, Rt2, R_sample):
     global dfs, name_of_the_file, start_from
     new_row = {'time': time_to_save,
-               'y': y,
-               'R_1': r1,
-               'R_2': r2,
-               'R_sample': r_obr}
+               'T': T,
+               'Rt1': Rt1,
+               'Rt2': Rt2,
+               'R_sample': R_sample}
     dfs = dfs.append(new_row, ignore_index=True)
     dfs.to_csv(f'{name_of_the_file}.csv', sep='\t', index=False)
 
