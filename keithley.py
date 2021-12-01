@@ -20,7 +20,7 @@ class Keithley_2000():
                 self.inst = rm.open_resource(
                     address,
                     baud_rate=19200,
-                    parity=pv.constants.Parity.odd,
+                    # parity=pv.constants.Parity.odd,
                     data_bits=8,
                     read_termination="\r"
                 )
@@ -52,7 +52,7 @@ class Keithley_2000():
             self.inst.write(f":FUNC \'{name_dict[function]}\'")
             print(f"func set to {self.inst.query(':FUNC?')}")
             if self.inst.query(":FUNC?").strip()[1:-1] != name_dict[function]:
-                raise KeyError(f'wrong key {self.inst.query(":FUNC?").strip()[1:-1]} != {name_dict[function]}')
+                raise KeyError(f'wrong key {self.inst.query(":FUNC?").strip()} != {name_dict[function]}')
             return self.inst.query(":FUNC?")
         except Exception as e:
             print(self.address, f": FAIL to func ({e})")
@@ -60,7 +60,7 @@ class Keithley_2000():
 
     def read(self):
         try:
-            print(self.inst.query(":DATA?"))
+            #print(self.inst.query(":DATA?"))
             return float(self.inst.query(":DATA?"))
         except Exception as e:
             print(self.address, f": FAIL to read ({e})")
@@ -89,8 +89,8 @@ class Keithley_2000():
 if __name__ == "__main__":
 
 
-    R1 = Keithley_2000("GPIB0::16::INSTR")
+    R1 = Keithley_2000("ASRL6::INSTR")
     R1.name()
-    R1.function(function='R4')
+    R1.function(function='R2')
     R1.read()
     R1.range(auto=False)

@@ -8,7 +8,7 @@ import threading
 import time as tm
 
 R1 = Keithley_2000("GPIB0::16::INSTR")
-R1.function(function='R4')
+R1.function(function='VDC')
 app = pg.mkQApp("Plotting Example")
 mw = QtGui.QMainWindow()
 mw.resize(1000, 600)
